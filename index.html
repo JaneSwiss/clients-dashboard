@@ -163,15 +163,15 @@
     <button class="detail-close" onclick="closeDetail()"><i class="ti ti-x"></i></button>
   </div>
   <div class="detail-tabs">
-    <button class="detail-tab active" data-dp="overview"><i class="ti ti-user"></i>Overview</button>
-    <button class="detail-tab" data-dp="questionnaire"><i class="ti ti-clipboard-list"></i>Questionnaire</button>
+    <button class="detail-tab active" data-dp="questionnaire"><i class="ti ti-clipboard-list"></i>Questionnaire</button>
     <button class="detail-tab" data-dp="deliverables"><i class="ti ti-checklist"></i>Deliverables</button>
     <button class="detail-tab" data-dp="files"><i class="ti ti-folder"></i>Files & Notes</button>
   </div>
   <div class="detail-body">
 
-    <!-- OVERVIEW TAB -->
-    <div class="detail-panel-inner active" id="dp-overview">
+    <!-- QUESTIONNAIRE TAB -->
+    <div class="detail-panel-inner active" id="dp-questionnaire">
+      <p class="field-section">Client Details</p>
       <div class="field-group">
         <p class="field-label">Package</p>
         <div id="dp-ov-package"></div>
@@ -203,10 +203,7 @@
       </div>
       <button class="save-btn" id="dp-save-btn" onclick="saveOverview()"><i class="ti ti-device-floppy"></i>Save changes</button>
       <p class="save-inline-msg" id="dp-save-msg"></p>
-    </div>
-
-    <!-- QUESTIONNAIRE TAB -->
-    <div class="detail-panel-inner" id="dp-questionnaire">
+      <hr class="field-divider" />
       <p class="field-section">Audience & Goals</p>
       <div class="field-group">
         <p class="field-label">Ideal target audience</p>
@@ -607,8 +604,8 @@ function closeDetail() {
   // reset to first tab
   document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.detail-panel-inner').forEach(p => p.classList.remove('active'));
-  document.querySelector('.detail-tab[data-dp="overview"]').classList.add('active');
-  document.getElementById('dp-overview').classList.add('active');
+  document.querySelector('.detail-tab[data-dp="questionnaire"]').classList.add('active');
+  document.getElementById('dp-questionnaire').classList.add('active');
 }
 
 // SAVE FUNCTIONS
