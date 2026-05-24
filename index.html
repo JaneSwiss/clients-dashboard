@@ -539,9 +539,16 @@ function openClient(idx) {
     setVal('dp-q-colors', q.brand_colors);
     setVal('dp-q-fonts', q.fonts);
     const logoEl = document.getElementById('dp-q-logo');
-    if (q.logo_url) {
-      logoEl.innerHTML = `<a href="${esc(q.logo_url)}" target="_blank"><img class="upload-thumb" src="${esc(q.logo_url)}" style="width:80px;height:80px;" /></a>`;
-    } else { logoEl.innerHTML = '<span class="field-val empty">No logo uploaded</span>'; }
+    let logoUrls = [];
+    try { logoUrls = JSON.parse(q.logo_url || '[]'); } catch { if (q.logo_url) logoUrls = [q.logo_url]; }
+    if (logoUrls.length > 0) {
+      logoEl.innerHTML = '<div class="upload-gallery">' + logoUrls.map(url => {
+        const isImg = /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url);
+        return isImg
+          ? `<a href="${esc(url)}" target="_blank"><img class="upload-thumb" src="${esc(url)}" /></a>`
+          : `<a href="${esc(url)}" target="_blank" class="upload-file-link"><i class="ti ti-file"></i>${esc(url.split('/').pop().split('?')[0])}</a>`;
+      }).join('') + '</div>';
+    } else { logoEl.innerHTML = '<span class="field-val empty">No files uploaded</span>'; }
   }
 
   // template preferences (Package 1 only)
