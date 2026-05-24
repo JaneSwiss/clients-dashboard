@@ -1,4 +1,58 @@
 {
   "auth_token": "switzer2026",
-  "clients": []
+  "clients": [
+    {
+      "id": "client_001",
+      "name": "test name",
+      "business_name": "test name",
+      "email": "qui.sum.ego.sum@gmail.com",
+      "package": "package_1",
+      "date_signed": "2026-05-24",
+      "status": "questionnaire_received",
+      "questionnaire": {
+        "urls": "",
+        "what_they_sell": "everything",
+        "target_audience": "",
+        "pinterest_goal": "Website traffic — more visitors to my site",
+        "hero_product": "",
+        "has_pinterest": false,
+        "pinterest_url": "",
+        "pinterest_email": "",
+        "pinterest_password": "",
+        "pinterest_create_email": "",
+        "content_drive_link": "",
+        "content_uploaded_files": [
+          "https://res.cloudinary.com/dfzejcxvs/image/upload/v1779610069/fbxxk7vzsspgvcy7bucb.png",
+          "https://res.cloudinary.com/dfzejcxvs/image/upload/v1779610072/vmrkdwatu03wj91mhvrj.png",
+          "https://res.cloudinary.com/dfzejcxvs/image/upload/v1779610076/ilpoduk0sfvurcdyxikw.png",
+          "https://res.cloudinary.com/dfzejcxvs/image/upload/v1779610083/kyfftgnvjgb22vzksplg.png",
+          "https://res.cloudinary.com/dfzejcxvs/image/upload/v1779610088/ynjlbsdbz3sfuttii55d.png"
+        ],
+        "brand_colors": "",
+        "fonts": "",
+        "logo_url": "",
+        "template_preferences": "",
+        "avoid": "",
+        "extra_notes": "unsure"
+      },
+      "deliverables": {
+        "niche_audit": false,
+        "competitor_analysis": false,
+        "keyword_research": false,
+        "pin_design_guidance": false,
+        "content_gap_analysis": false,
+        "strategy_document": false,
+        "pin_templates_50": false,
+        "business_account_setup": false,
+        "website_claiming": false,
+        "account_branding": false,
+        "profile_seo": false,
+        "boards_created_10": false,
+        "pins_created_50": false,
+        "pins_scheduled": false
+      },
+      "files": {},
+      "notes": ""
+    }
+  ]
 }
