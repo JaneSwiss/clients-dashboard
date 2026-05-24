@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pinterest Clients Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #faf8f5; --surface: #fff; --surface2: #f3f0eb;
+    --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.18);
+    --text: #1a1410; --text2: #6b6058; --text3: #a09488;
+    --choc: #3B2314; --choc2: #2e1b0e; --coral: #993C1D;
+    --teal-bg: #E1F5EE; --teal-text: #085041; --teal-mid: #1D9E75;
+    --amber-bg: #FAEEDA; --amber-text: #633806; --amber-mid: #BA7517;
+    --coral-bg: #FAECE7; --coral-text: #712B13;
+    --red-bg: #FDECEA; --red-text: #8B1A0E; --red-mid: #C0392B;
+    --blue-bg: #E8F0FE; --blue-text: #1a3a6e; --blue-mid: #3b6dd4;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 10px; --radius-sm: 6px;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+  /* AUTH OVERLAY */
+  .token-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1.25rem; }
+  .token-box { background: var(--surface); border-radius: var(--radius); padding: 2rem; max-width: 440px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+  .token-box h2 { font-family: var(--serif); font-size: 20px; font-weight: normal; margin-bottom: 8px; }
+  .token-box p { font-size: 13px; color: var(--text2); margin-bottom: 1.25rem; line-height: 1.6; }
+  .token-box input { width: 100%; font-size: 13px; padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius-sm); font-family: var(--sans); color: var(--text); margin-bottom: 10px; outline: none; }
+  .token-box input:focus { border-color: var(--choc); }
+  .token-err { font-size: 12px; color: var(--red-mid); margin-bottom: 8px; display: none; }
+  .token-box button { width: 100%; background: var(--choc); color: #fff; border: none; border-radius: var(--radius-sm); padding: 10px; font-size: 14px; cursor: pointer; font-family: var(--sans); }
+  .token-box button:hover { background: var(--choc2); }
+
+  /* HEADER */
+  .banner { background: var(--choc); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .banner-sub { font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
+  .banner h1 { font-family: var(--serif); font-size: 22px; font-weight: normal; color: #fff; }
+  .banner-right { display: flex; align-items: center; gap: 10px; }
+  .banner-date { font-size: 13px; color: rgba(255,255,255,0.55); }
+  .banner-btn { font-size: 12px; cursor: pointer; background: none; border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-sm); padding: 6px 12px; color: rgba(255,255,255,0.75); font-family: var(--sans); display: inline-flex; align-items: center; gap: 6px; }
+  .banner-btn:hover { background: rgba(255,255,255,0.1); }
+  .banner-btn.primary { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); color: #fff; }
+
+  /* STATS ROW */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+  .stat-label { font-size: 11px; color: var(--text3); letter-spacing: .09em; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-val { font-family: var(--serif); font-size: 24px; color: var(--text); }
+  .stat-sub { font-size: 12px; color: var(--text3); margin-top: 3px; }
+
+  /* CLIENT CARDS */
+  .client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .client-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+  .client-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: var(--border2); }
+  .client-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
+  .client-name { font-family: var(--serif); font-size: 16px; font-weight: normal; color: var(--text); }
+  .client-biz { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .client-card-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .client-date { font-size: 11px; color: var(--text3); }
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text3); }
+  .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
+  .empty-state p { font-size: 14px; }
+
+  /* BADGES */
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 500; white-space: nowrap; display: inline-block; }
+  .badge-teal   { background: var(--teal-bg);  color: var(--teal-text); }
+  .badge-amber  { background: var(--amber-bg); color: var(--amber-text); }
+  .badge-coral  { background: var(--coral-bg); color: var(--coral-text); }
+  .badge-gray   { background: var(--surface2); color: var(--text2); }
+  .badge-blue   { background: var(--blue-bg);  color: var(--blue-text); }
+  .badge-choc   { background: var(--choc);     color: #fff; }
+
+  /* DETAIL PANEL */
+  .detail-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 50; display: none; }
+  .detail-overlay.open { display: block; }
+  .detail-panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(680px, 100vw); background: var(--surface); box-shadow: -4px 0 32px rgba(0,0,0,0.12); z-index: 51; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.25s ease; overflow: hidden; }
+  .detail-panel.open { transform: translateX(0); }
+  .detail-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-shrink: 0; background: var(--surface); }
+  .detail-header-left h2 { font-family: var(--serif); font-size: 20px; font-weight: normal; }
+  .detail-header-left p { font-size: 13px; color: var(--text3); margin-top: 3px; }
+  .detail-close { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 22px; padding: 2px; flex-shrink: 0; }
+  .detail-close:hover { color: var(--text); }
+  .detail-tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 1.5rem; flex-shrink: 0; overflow-x: auto; background: var(--surface); }
+  .detail-tab { background: none; border: none; border-bottom: 2px solid transparent; padding: 10px 14px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text2); font-family: var(--sans); white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+  .detail-tab:hover { color: var(--text); }
+  .detail-tab.active { color: var(--text); border-bottom-color: var(--choc); }
+  .detail-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
+  .detail-panel-inner { display: none; }
+  .detail-panel-inner.active { display: block; }
+
+  /* FORM ELEMENTS IN DETAIL */
+  .field-group { margin-bottom: 1.25rem; }
+  .field-label { font-size: 11px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 5px; font-weight: 500; }
+  .field-val { font-size: 14px; color: var(--text); line-height: 1.5; }
+  .field-val.empty { color: var(--text3); font-style: italic; }
+  .field-divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+  .field-section { font-family: var(--serif); font-size: 15px; color: var(--text); margin-bottom: 1rem; margin-top: 0.25rem; }
+  select.inline-select { font-size: 13px; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 6px 10px; font-family: var(--sans); color: var(--text); background: var(--surface); cursor: pointer; outline: none; }
+  select.inline-select:focus { border-color: var(--choc); }
+  textarea.inline-textarea { width: 100%; font-size: 13px; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 9px 12px; font-family: var(--sans); color: var(--text); background: var(--surface); resize: vertical; min-height: 90px; outline: none; line-height: 1.5; }
+  textarea.inline-textarea:focus { border-color: var(--choc); }
+  .save-btn { background: var(--choc); color: #fff; border: none; border-radius: var(--radius-sm); padding: 8px 18px; font-size: 13px; cursor: pointer; font-family: var(--sans); display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; }
+  .save-btn:hover { background: var(--choc2); }
+  .save-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .save-inline-msg { font-size: 12px; color: var(--teal-mid); margin-top: 8px; min-height: 16px; }
+
+  /* DELIVERABLES */
+  .deliverable-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .deliverable-item:last-child { border-bottom: none; }
+  .deliverable-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--choc); flex-shrink: 0; }
+  .deliverable-label { font-size: 13px; color: var(--text); flex: 1; }
+  .deliverable-label.done { text-decoration: line-through; color: var(--text3); }
+  .deliverable-section { font-size: 11px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; font-weight: 500; padding: 12px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 2px; }
+
+  /* FILES */
+  .file-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .file-item:last-child { border-bottom: none; }
+  .file-label { font-size: 13px; color: var(--text2); width: 160px; flex-shrink: 0; }
+  .file-input { flex: 1; font-size: 13px; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 6px 10px; font-family: var(--sans); color: var(--text); outline: none; }
+  .file-input:focus { border-color: var(--choc); }
+  .file-link { font-size: 13px; color: var(--choc); text-decoration: none; }
+  .file-link:hover { text-decoration: underline; }
+
+  /* UPLOADED FILES GALLERY */
+  .upload-gallery { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .upload-thumb { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; border: 1px solid var(--border); }
+  .upload-file-link { font-size: 12px; color: var(--choc); text-decoration: none; display: flex; align-items: center; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px 8px; border: 1px solid var(--border); }
+  .upload-file-link:hover { text-decoration: underline; }
+
+  /* CARD SHARED */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .card-title { font-family: var(--serif); font-size: 18px; font-weight: normal; color: var(--text); display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div class="token-overlay" id="token-overlay">
+  <div class="token-box">
+    <h2>Pinterest Client Dashboard</h2>
+    <p>Enter your access code to view client data.</p>
+    <input type="password" id="token-input" placeholder="Enter access code" onkeydown="if(event.key==='Enter')checkToken()" />
+    <p class="token-err" id="token-err">Incorrect code. Please try again.</p>
+    <button onclick="checkToken()">Open dashboard</button>
+  </div>
+</div>
+
+<!-- DETAIL OVERLAY (backdrop) -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail()"></div>
+
+<!-- CLIENT DETAIL PANEL -->
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div class="detail-header-left">
+      <h2 id="dp-name">Client name</h2>
+      <p id="dp-biz">Business name</p>
+    </div>
+    <button class="detail-close" onclick="closeDetail()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="detail-tabs">
+    <button class="detail-tab active" data-dp="overview"><i class="ti ti-user"></i>Overview</button>
+    <button class="detail-tab" data-dp="questionnaire"><i class="ti ti-clipboard-list"></i>Questionnaire</button>
+    <button class="detail-tab" data-dp="deliverables"><i class="ti ti-checklist"></i>Deliverables</button>
+    <button class="detail-tab" data-dp="files"><i class="ti ti-folder"></i>Files & Notes</button>
+  </div>
+  <div class="detail-body">
+
+    <!-- OVERVIEW TAB -->
+    <div class="detail-panel-inner active" id="dp-overview">
+      <div class="field-group">
+        <p class="field-label">Package</p>
+        <div id="dp-ov-package"></div>
+      </div>
+      <div class="field-group">
+        <p class="field-label">Status</p>
+        <select class="inline-select" id="dp-ov-status" onchange="markUnsaved()">
+          <option value="questionnaire_received">Questionnaire Received</option>
+          <option value="in_progress">In Progress</option>
+          <option value="delivered">Delivered</option>
+          <option value="complete">Complete</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <p class="field-label">Email</p>
+        <p class="field-val" id="dp-ov-email">—</p>
+      </div>
+      <div class="field-group">
+        <p class="field-label">Date signed</p>
+        <p class="field-val" id="dp-ov-date">—</p>
+      </div>
+      <div class="field-group">
+        <p class="field-label">Website / Etsy / Instagram</p>
+        <p class="field-val" id="dp-ov-urls">—</p>
+      </div>
+      <div class="field-group">
+        <p class="field-label">What they sell</p>
+        <p class="field-val" id="dp-ov-sells">—</p>
+      </div>
+      <button class="save-btn" id="dp-save-btn" onclick="saveOverview()"><i class="ti ti-device-floppy"></i>Save changes</button>
+      <p class="save-inline-msg" id="dp-save-msg"></p>
+    </div>
+
+    <!-- QUESTIONNAIRE TAB -->
+    <div class="detail-panel-inner" id="dp-questionnaire">
+      <p class="field-section">Audience & Goals</p>
+      <div class="field-group">
+        <p class="field-label">Ideal target audience</p>
+        <p class="field-val" id="dp-q-audience">—</p>
+      </div>
+      <div class="field-group">
+        <p class="field-label">Main goal from Pinterest</p>
+        <p class="field-val" id="dp-q-goal">—</p>
+      </div>
+      <div class="field-group">
+        <p class="field-label">Hero product / service</p>
+        <p class="field-val" id="dp-q-hero">—</p>
+      </div>
+      <hr class="field-divider" />
+      <p class="field-section">Pinterest Presence</p>
+      <div class="field-group">
+        <p class="field-label">Has Pinterest account</p>
+        <p class="field-val" id="dp-q-has-pinterest">—</p>
+      </div>
+      <div class="field-group" id="dp-q-pinterest-existing-wrap">
+        <p class="field-label">Pinterest profile URL</p>
+        <p class="field-val" id="dp-q-pinterest-url">—</p>
+      </div>
+      <div class="field-group" id="dp-q-pinterest-login-wrap">
+        <p class="field-label">Login email</p>
+        <p class="field-val" id="dp-q-pinterest-email">—</p>
+      </div>
+      <div class="field-group" id="dp-q-pinterest-create-wrap">
+        <p class="field-label">Email to create new account</p>
+        <p class="field-val" id="dp-q-pinterest-create-email">—</p>
+      </div>
+      <hr class="field-divider" />
+      <p class="field-section">Content & Assets</p>
+      <div class="field-group">
+        <p class="field-label">Google Drive link</p>
+        <p class="field-val" id="dp-q-drive">—</p>
+      </div>
+      <div class="field-group">
+        <p class="field-label">Uploaded files</p>
+        <div class="upload-gallery" id="dp-q-uploads"></div>
+      </div>
+      <hr class="field-divider" />
+      <p class="field-section" id="dp-q-brand-section" style="display:none;">Brand Assets</p>
+      <div class="field-group" id="dp-q-brand-wrap" style="display:none;">
+        <div class="field-group">
+          <p class="field-label">Brand colors</p>
+          <p class="field-val" id="dp-q-colors">—</p>
+        </div>
+        <div class="field-group">
+          <p class="field-label">Fonts</p>
+          <p class="field-val" id="dp-q-fonts">—</p>
+        </div>
+        <div class="field-group">
+          <p class="field-label">Logo</p>
+          <div id="dp-q-logo"></div>
+        </div>
+      </div>
+      <div class="field-group" id="dp-q-templates-wrap" style="display:none;">
+        <hr class="field-divider" />
+        <p class="field-section">Pin Template Preferences</p>
+        <p class="field-val" id="dp-q-templates">—</p>
+      </div>
+      <hr class="field-divider" />
+      <p class="field-section">Communication</p>
+      <div class="field-group">
+        <p class="field-label">Things to avoid</p>
+        <p class="field-val" id="dp-q-avoid">—</p>
+      </div>
+      <div class="field-group">
+        <p class="field-label">Additional notes from client</p>
+        <p class="field-val" id="dp-q-extra">—</p>
+      </div>
+    </div>
+
+    <!-- DELIVERABLES TAB -->
+    <div class="detail-panel-inner" id="dp-deliverables">
+      <div id="dp-deliverables-list"></div>
+      <button class="save-btn" id="dp-del-save-btn" onclick="saveDeliverables()"><i class="ti ti-device-floppy"></i>Save progress</button>
+      <p class="save-inline-msg" id="dp-del-save-msg"></p>
+    </div>
+
+    <!-- FILES & NOTES TAB -->
+    <div class="detail-panel-inner" id="dp-files">
+      <p class="field-section">Delivered files</p>
+      <div id="dp-files-list"></div>
+      <hr class="field-divider" />
+      <p class="field-section">Notes</p>
+      <textarea class="inline-textarea" id="dp-notes" placeholder="Add notes about this client…" oninput="markUnsaved()"></textarea>
+      <button class="save-btn" id="dp-files-save-btn" onclick="saveFilesNotes()"><i class="ti ti-device-floppy"></i>Save</button>
+      <p class="save-inline-msg" id="dp-files-save-msg"></p>
+    </div>
+
+  </div><!-- /detail-body -->
+</div><!-- /detail-panel -->
+
+<!-- MAIN CONTENT -->
+<div class="container" id="main-content" style="display:none;">
+
+  <div class="banner">
+    <div>
+      <p class="banner-sub">Switzertemplates</p>
+      <h1>Pinterest Client Dashboard</h1>
+    </div>
+    <div class="banner-right">
+      <span class="banner-date" id="dash-date"></span>
+      <button class="banner-btn" onclick="loadDashboard()"><i class="ti ti-refresh"></i>Refresh</button>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><p class="stat-label">Total clients</p><p class="stat-val" id="stat-total">0</p></div>
+    <div class="stat-card"><p class="stat-label">In progress</p><p class="stat-val" id="stat-active">0</p></div>
+    <div class="stat-card"><p class="stat-label">Completed</p><p class="stat-val" id="stat-done">0</p></div>
+    <div class="stat-card"><p class="stat-label">Package 1</p><p class="stat-val" id="stat-p1">0</p><p class="stat-sub">Strategy</p></div>
+    <div class="stat-card"><p class="stat-label">Package 2</p><p class="stat-val" id="stat-p2">0</p><p class="stat-sub">Setup & Branding</p></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="ti ti-users" style="color:var(--coral);font-size:18px;"></i>All clients</span>
+      <span class="badge badge-gray" id="client-count">0 clients</span>
+    </div>
+    <div class="client-grid" id="client-grid">
+      <div class="empty-state">
+        <i class="ti ti-inbox"></i>
+        <p>No clients yet. Send your first client the onboarding form and they'll appear here automatically.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+const REPO = 'JaneSwiss/clients-dashboard';
+const FILE = 'pinterest_clients.json';
+const RAW_URL = `https://raw.githubusercontent.com/${REPO}/main/${FILE}`;
+const API_URL = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+
+let data = null;
+let currentClientIdx = null;
+let unsaved = false;
+
+const STATUS_LABELS = {
+  questionnaire_received: 'Questionnaire Received',
+  in_progress: 'In Progress',
+  delivered: 'Delivered',
+  complete: 'Complete'
+};
+const STATUS_BADGES = {
+  questionnaire_received: 'badge-blue',
+  in_progress: 'badge-amber',
+  delivered: 'badge-teal',
+  complete: 'badge-gray'
+};
+const PKG_LABELS = {
+  package_1: 'Package 1 — Strategy',
+  package_2: 'Package 2 — Setup & Branding'
+};
+const PKG_BADGES = {
+  package_1: 'badge-coral',
+  package_2: 'badge-choc'
+};
+
+const DELIVERABLES_P1 = [
+  { key: 'niche_audit',          label: 'Niche audit' },
+  { key: 'competitor_analysis',  label: 'Competitor analysis' },
+  { key: 'keyword_research',     label: 'Keyword research' },
+  { key: 'pin_design_guidance',  label: 'Pin design guidance' },
+  { key: 'content_gap_analysis', label: 'Content gap analysis' },
+  { key: 'strategy_document',    label: 'Strategy document delivered' },
+  { key: 'pin_templates_50',     label: '50 pin templates created in Canva' },
+];
+const DELIVERABLES_P2 = [
+  { key: 'business_account_setup', label: 'Pinterest business account setup' },
+  { key: 'website_claiming',        label: 'Website claiming & rich pins enabled' },
+  { key: 'account_branding',        label: 'Account branding (banner, board covers, logo)' },
+  { key: 'profile_seo',             label: 'Profile SEO optimised' },
+  { key: 'boards_created_10',       label: '10 SEO-optimised boards created & populated' },
+  { key: 'pins_created_50',         label: '50 custom pins created in Canva' },
+  { key: 'pins_scheduled',          label: 'Pins scheduled in Tailwind' },
+];
+
+const FILE_SLOTS = [
+  { key: 'strategy_doc',   label: 'Strategy Document' },
+  { key: 'canva_folder',   label: 'Canva Pin Templates' },
+  { key: 'tailwind_queue', label: 'Tailwind Queue' },
+  { key: 'extra_1',        label: 'Other file 1' },
+  { key: 'extra_2',        label: 'Other file 2' },
+];
+
+// AUTH
+function checkToken() {
+  const val = document.getElementById('token-input').value.trim();
+  if (!data) { fetchData(val); return; }
+  if (val === data.auth_token) { unlock(); }
+  else { document.getElementById('token-err').style.display = 'block'; }
+}
+
+function unlock() {
+  document.getElementById('token-overlay').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+  renderDashboard();
+}
+
+async function fetchData(enteredToken) {
+  try {
+    const r = await fetch(RAW_URL + '?t=' + Date.now());
+    if (!r.ok) throw new Error('fetch failed');
+    data = await r.json();
+    if (enteredToken === data.auth_token) { unlock(); }
+    else { document.getElementById('token-err').style.display = 'block'; }
+  } catch(e) {
+    document.getElementById('token-err').textContent = 'Could not load data. Check your internet connection.';
+    document.getElementById('token-err').style.display = 'block';
+  }
+}
+
+async function loadDashboard() {
+  try {
+    const r = await fetch(RAW_URL + '?t=' + Date.now());
+    data = await r.json();
+    renderDashboard();
+  } catch(e) {}
+}
+
+// RENDER
+function renderDashboard() {
+  const clients = data.clients || [];
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'long', year:'numeric' });
+
+  // stats
+  const active = clients.filter(c => c.status === 'in_progress').length;
+  const done = clients.filter(c => c.status === 'complete').length;
+  const p1 = clients.filter(c => c.package === 'package_1').length;
+  const p2 = clients.filter(c => c.package === 'package_2').length;
+  document.getElementById('stat-total').textContent = clients.length;
+  document.getElementById('stat-active').textContent = active;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-p1').textContent = p1;
+  document.getElementById('stat-p2').textContent = p2;
+  document.getElementById('client-count').textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
+
+  // client grid
+  const grid = document.getElementById('client-grid');
+  if (clients.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="ti ti-inbox"></i><p>No clients yet. Send your first client the onboarding form and they'll appear here automatically.</p></div>`;
+    return;
+  }
+  grid.innerHTML = clients.map((c, i) => `
+    <div class="client-card" onclick="openClient(${i})">
+      <div class="client-card-top">
+        <div>
+          <p class="client-name">${esc(c.name || 'Unnamed')}</p>
+          <p class="client-biz">${esc(c.business_name || '')}</p>
+        </div>
+        <span class="badge ${PKG_BADGES[c.package] || 'badge-gray'}">${c.package === 'package_1' ? 'P1' : 'P2'}</span>
+      </div>
+      <div class="client-card-bottom">
+        <span class="client-date">${formatDate(c.date_signed)}</span>
+        <span class="badge ${STATUS_BADGES[c.status] || 'badge-gray'}">${STATUS_LABELS[c.status] || c.status}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// CLIENT DETAIL
+function openClient(idx) {
+  currentClientIdx = idx;
+  const c = data.clients[idx];
+  const q = c.questionnaire || {};
+
+  // header
+  document.getElementById('dp-name').textContent = c.name || 'Unnamed';
+  document.getElementById('dp-biz').textContent = c.business_name || '';
+
+  // overview tab
+  const pkgBadge = `<span class="badge ${PKG_BADGES[c.package] || 'badge-gray'}">${PKG_LABELS[c.package] || c.package}</span>`;
+  document.getElementById('dp-ov-package').innerHTML = pkgBadge;
+  document.getElementById('dp-ov-status').value = c.status || 'questionnaire_received';
+  document.getElementById('dp-ov-email').textContent = c.email || '—';
+  document.getElementById('dp-ov-date').textContent = formatDate(c.date_signed);
+  setVal('dp-ov-urls', q.urls);
+  setVal('dp-ov-sells', q.what_they_sell);
+
+  // questionnaire tab
+  setVal('dp-q-audience', q.target_audience);
+  setVal('dp-q-goal', q.pinterest_goal);
+  setVal('dp-q-hero', q.hero_product);
+  setVal('dp-q-has-pinterest', q.has_pinterest ? 'Yes' : 'No');
+
+  const hasPinterest = !!q.has_pinterest;
+  show('dp-q-pinterest-existing-wrap', hasPinterest);
+  show('dp-q-pinterest-login-wrap', hasPinterest);
+  show('dp-q-pinterest-create-wrap', !hasPinterest && c.package === 'package_2');
+  setVal('dp-q-pinterest-url', q.pinterest_url);
+  setVal('dp-q-pinterest-email', q.pinterest_email);
+  setVal('dp-q-pinterest-create-email', q.pinterest_create_email);
+
+  // drive link
+  const driveEl = document.getElementById('dp-q-drive');
+  if (q.content_drive_link) {
+    driveEl.innerHTML = `<a href="${esc(q.content_drive_link)}" target="_blank" class="file-link">${esc(q.content_drive_link)}</a>`;
+  } else { driveEl.innerHTML = '<span class="field-val empty">None provided</span>'; }
+
+  // uploaded files
+  const uploadsEl = document.getElementById('dp-q-uploads');
+  const files = q.content_uploaded_files || [];
+  if (files.length > 0) {
+    uploadsEl.innerHTML = files.map(url => {
+      const isImg = /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url);
+      return isImg
+        ? `<a href="${esc(url)}" target="_blank"><img class="upload-thumb" src="${esc(url)}" /></a>`
+        : `<a href="${esc(url)}" target="_blank" class="upload-file-link"><i class="ti ti-file"></i>${esc(url.split('/').pop().split('?')[0])}</a>`;
+    }).join('');
+  } else { uploadsEl.innerHTML = '<span class="field-val empty">No files uploaded</span>'; }
+
+  // brand assets (Package 2 only)
+  const isP2 = c.package === 'package_2';
+  show('dp-q-brand-section', isP2);
+  show('dp-q-brand-wrap', isP2);
+  if (isP2) {
+    setVal('dp-q-colors', q.brand_colors);
+    setVal('dp-q-fonts', q.fonts);
+    const logoEl = document.getElementById('dp-q-logo');
+    if (q.logo_url) {
+      logoEl.innerHTML = `<a href="${esc(q.logo_url)}" target="_blank"><img class="upload-thumb" src="${esc(q.logo_url)}" style="width:80px;height:80px;" /></a>`;
+    } else { logoEl.innerHTML = '<span class="field-val empty">No logo uploaded</span>'; }
+  }
+
+  // template preferences (Package 1 only)
+  const isP1 = c.package === 'package_1';
+  show('dp-q-templates-wrap', isP1);
+  setVal('dp-q-templates', q.template_preferences);
+
+  setVal('dp-q-avoid', q.avoid);
+  setVal('dp-q-extra', q.extra_notes);
+
+  // deliverables tab
+  renderDeliverables(c);
+
+  // files & notes tab
+  renderFilesNotes(c);
+
+  // open panel
+  document.getElementById('detail-overlay').classList.add('open');
+  document.getElementById('detail-panel').classList.add('open');
+  unsaved = false;
+}
+
+function renderDeliverables(c) {
+  const del = c.deliverables || {};
+  const isP2 = c.package === 'package_2';
+  const items = isP2 ? [...DELIVERABLES_P1, ...DELIVERABLES_P2] : DELIVERABLES_P1;
+  const p2Start = DELIVERABLES_P1.length;
+
+  let html = '';
+  if (isP2) html += `<p class="deliverable-section">Package 1 — Research & Strategy</p>`;
+  items.forEach((item, i) => {
+    if (isP2 && i === p2Start) html += `<p class="deliverable-section">Package 2 — Setup & Branding</p>`;
+    const checked = del[item.key] ? 'checked' : '';
+    const doneClass = del[item.key] ? 'done' : '';
+    html += `<div class="deliverable-item">
+      <input type="checkbox" id="del-${item.key}" ${checked} onchange="markUnsaved()" />
+      <label for="del-${item.key}" class="deliverable-label ${doneClass}">${item.label}</label>
+    </div>`;
+  });
+  document.getElementById('dp-deliverables-list').innerHTML = html;
+}
+
+function renderFilesNotes(c) {
+  const files = c.files || {};
+  let html = FILE_SLOTS.map(slot => {
+    const url = files[slot.key] || '';
+    return `<div class="file-item">
+      <span class="file-label">${slot.label}</span>
+      <input class="file-input" type="url" placeholder="Paste link…" value="${esc(url)}" data-file-key="${slot.key}" oninput="markUnsaved()" />
+    </div>`;
+  }).join('');
+  document.getElementById('dp-files-list').innerHTML = html;
+  document.getElementById('dp-notes').value = c.notes || '';
+}
+
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.getElementById('detail-panel').classList.remove('open');
+  currentClientIdx = null;
+  // reset to first tab
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.detail-panel-inner').forEach(p => p.classList.remove('active'));
+  document.querySelector('.detail-tab[data-dp="overview"]').classList.add('active');
+  document.getElementById('dp-overview').classList.add('active');
+}
+
+// SAVE FUNCTIONS
+function markUnsaved() { unsaved = true; }
+
+async function saveOverview() {
+  const c = data.clients[currentClientIdx];
+  c.status = document.getElementById('dp-ov-status').value;
+  await pushJSON('dp-save-msg', 'dp-save-btn');
+  renderDashboard();
+}
+
+async function saveDeliverables() {
+  const c = data.clients[currentClientIdx];
+  const del = c.deliverables || {};
+  const isP2 = c.package === 'package_2';
+  const items = isP2 ? [...DELIVERABLES_P1, ...DELIVERABLES_P2] : DELIVERABLES_P1;
+  items.forEach(item => {
+    del[item.key] = document.getElementById('del-' + item.key)?.checked || false;
+  });
+  c.deliverables = del;
+  await pushJSON('dp-del-save-msg', 'dp-del-save-btn');
+}
+
+async function saveFilesNotes() {
+  const c = data.clients[currentClientIdx];
+  const fileInputs = document.querySelectorAll('[data-file-key]');
+  if (!c.files) c.files = {};
+  fileInputs.forEach(inp => { c.files[inp.dataset.fileKey] = inp.value.trim(); });
+  c.notes = document.getElementById('dp-notes').value;
+  await pushJSON('dp-files-save-msg', 'dp-files-save-btn');
+}
+
+async function pushJSON(msgId, btnId) {
+  const token = localStorage.getItem('gh_token');
+  if (!token) {
+    const t = prompt('Enter your GitHub token to save changes:');
+    if (!t) return;
+    localStorage.setItem('gh_token', t);
+  }
+  const btn = document.getElementById(btnId);
+  const msg = document.getElementById(msgId);
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i>Saving…';
+  try {
+    // get current sha
+    const r = await fetch(API_URL, { headers: { Authorization: 'token ' + localStorage.getItem('gh_token') } });
+    const meta = await r.json();
+    const sha = meta.sha;
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+    const res = await fetch(API_URL, {
+      method: 'PUT',
+      headers: { Authorization: 'token ' + localStorage.getItem('gh_token'), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Dashboard update', content, sha })
+    });
+    if (!res.ok) throw new Error('save failed');
+    msg.textContent = 'Saved ✓';
+    setTimeout(() => msg.textContent = '', 3000);
+    unsaved = false;
+  } catch(e) {
+    msg.textContent = 'Save failed — check your GitHub token.';
+    msg.style.color = 'var(--red-mid)';
+    setTimeout(() => { msg.textContent = ''; msg.style.color = ''; }, 4000);
+    localStorage.removeItem('gh_token');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-device-floppy"></i>Save changes';
+}
+
+// TABS
+document.querySelectorAll('.detail-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.detail-panel-inner').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('dp-' + tab.dataset.dp).classList.add('active');
+  });
+});
+
+// HELPERS
+function esc(str) { return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function show(id, visible) { document.getElementById(id).style.display = visible ? '' : 'none'; }
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (val) { el.textContent = val; el.classList.remove('empty'); }
+  else { el.textContent = 'Not provided'; el.classList.add('empty'); }
+}
+function formatDate(str) {
+  if (!str) return '—';
+  const d = new Date(str);
+  return d.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+}
+
+// INIT
+window.addEventListener('load', () => {
+  document.getElementById('token-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkToken(); });
+});
+</script>
+</body>
+</html>
