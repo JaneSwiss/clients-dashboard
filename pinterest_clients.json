@@ -147,6 +147,53 @@
       },
       "files": {},
       "notes": ""
+    },
+    {
+      "id": "client_004",
+      "name": "blah blah",
+      "business_name": "blah blah",
+      "email": "qui.sum.ego.sum@gmail.com",
+      "package": "package_2",
+      "date_signed": "2026-05-26",
+      "status": "questionnaire_received",
+      "questionnaire": {
+        "urls": "switzertemplates.com",
+        "what_they_sell": "",
+        "target_audience": "",
+        "pinterest_goal": "",
+        "hero_product": "",
+        "has_pinterest": false,
+        "pinterest_url": "",
+        "pinterest_email": "",
+        "pinterest_password": "",
+        "pinterest_create_email": "",
+        "content_drive_link": "",
+        "content_uploaded_files": [],
+        "brand_colors": "",
+        "fonts": "",
+        "logo_url": [],
+        "template_preferences": "",
+        "avoid": "",
+        "extra_notes": ""
+      },
+      "deliverables": {
+        "niche_audit": false,
+        "competitor_analysis": false,
+        "keyword_research": false,
+        "pin_design_guidance": false,
+        "content_gap_analysis": false,
+        "strategy_document": false,
+        "pin_templates_50": false,
+        "business_account_setup": false,
+        "website_claiming": false,
+        "account_branding": false,
+        "profile_seo": false,
+        "boards_created_10": false,
+        "pins_created_50": false,
+        "pins_scheduled": false
+      },
+      "files": {},
+      "notes": ""
     }
   ]
 }
