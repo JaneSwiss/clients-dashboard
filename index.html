@@ -540,7 +540,8 @@ function openClient(idx) {
     setVal('dp-q-fonts', q.fonts);
     const logoEl = document.getElementById('dp-q-logo');
     let logoUrls = [];
-    try { logoUrls = JSON.parse(q.logo_url || '[]'); } catch { if (q.logo_url) logoUrls = [q.logo_url]; }
+    if (Array.isArray(q.logo_url)) { logoUrls = q.logo_url; }
+    else { try { logoUrls = JSON.parse(q.logo_url || '[]'); } catch { if (q.logo_url) logoUrls = [q.logo_url]; } }
     if (logoUrls.length > 0) {
       logoEl.innerHTML = '<div class="upload-gallery">' + logoUrls.map(url => {
         const isImg = /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url);
